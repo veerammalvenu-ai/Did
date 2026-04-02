@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>For Thulir Nila</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Inter&display=swap" rel="stylesheet">
+
+<style>
+body{
+ margin:0;
+ font-family:Inter;
+ color:white;
+ overflow:hidden;
+ background:#02030a;
+}
+
+/* LIGHT */
+.light{
+ position:fixed;
+ width:500px;
+ height:500px;
+ background:radial-gradient(circle,rgba(216,180,194,0.2),transparent);
+ filter:blur(100px);
+ animation:moveLight 12s infinite alternate;
+}
+@keyframes moveLight{
+ from{transform:translate(-20%,-20%);}
+ to{transform:translate(40%,40%);}
+}
+
+/* FILM GRAIN */
+body::after{
+ content:"";
+ position:fixed;
+ inset:-50%;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+ animation:grain 8s steps(10) infinite;
+}
+@keyframes grain{to{transform:translate(-5%,-5%);}}
+
+/* SCENE */
+.scene{
+ position:absolute;
+ inset:0;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ flex-direction:column;
+ opacity:0;
+ transition:2s;
+}
+.scene.active{opacity:1;}
+
+h1,h2{
+ font-family:"Playfair Display";
+ text-align:center;
+}
+
+/* CONFETTI */
+#confetti{
+ position:fixed;
+ inset:0;
+ pointer-events:none;
+}
+
+/* FADE */
+.fade{
+ position:fixed;
+ inset:0;
+ background:black;
+ opacity:0;
+ transition:5s;
+}
+.fade.active{opacity:1;}
+</style>
+</head>
+
+<body>
+
+<div class="light"></div>
+<div id="fade" class="fade"></div>
+<canvas id="confetti"></canvas>
+
+<!-- AUDIO -->
+<audio id="music" loop>
+<source src="https://raw.githubusercontent.com/veerammalvenu-ai/Audio-/main/Flute_Instrumental_Music_256kbps.webm">
+</audio>
+
+<audio id="popSound">
+<source src="https://cdn.pixabay.com/audio/2022/03/15/audio_115b9b16d4.mp3">
+</audio>
+
+<!-- SCENES -->
+<div class="scene active" id="s1"><h1 id="t1"></h1></div>
+<div class="scene" id="s2"><h2 id="t2"></h2></div>
+<div class="scene" id="s3"><h2 id="t3"></h2></div>
+<div class="scene" id="s4"><h2 id="t4"></h2></div>
+<div class="scene" id="s5"><h2 id="t5"></h2></div>
+<div class="scene" id="s6"><h1 id="t6"></h1></div>
+
+<script>
+
+/* MUSIC START (tap anywhere) */
+const music = document.getElementById("music");
+["click","touchstart"].forEach(e=>{
+ document.addEventListener(e,()=>{
+   music.volume=0.12;
+   music.play();
+ },{once:true});
+});
+
+/* TYPE EFFECT */
+function type(el,text,speed=45){
+ let i=0;
+ el.innerHTML="";
+ function t(){
+  if(i<text.length){
+   el.innerHTML+=text[i++];
+   setTimeout(t,speed);
+  }
+ }
+ t();
+}
+
+/* SCENE SWITCH */
+function show(id){
+ document.querySelectorAll(".scene").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+}
+
+/* FLOW */
+setTimeout(()=>{
+ type(t1,"I had no feelings for you like that...");
+},1000);
+
+setTimeout(()=>{
+ show("s2");
+ type(t2,"Until I saw your personality...");
+},6000);
+
+setTimeout(()=>{
+ show("s3");
+ type(t3,"You are calm... and bold...");
+},12000);
+
+setTimeout(()=>{
+ show("s4");
+ type(t4,"And that’s what made me start feeling something for you...");
+},18000);
+
+setTimeout(()=>{
+ show("s5");
+ type(t5,"Finally... I found the courage to say it...");
+},25000);
+
+/* FINAL SCENE */
+setTimeout(()=>{
+ show("s6");
+
+ type(t6,"WISH YOU MANY MORE HAPPY RETURNS OF THE DAY 🎉");
+
+ /* PERFECT TIMED BLAST */
+ setTimeout(()=>{
+   burstConfetti();
+   popSound.volume=0.4;
+   popSound.play();
+ },2000);
+
+},32000);
+
+/* CONFETTI SYSTEM */
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+let particles=[];
+
+function burstConfetti(){
+ for(let i=0;i<120;i++){
+  particles.push({
+   x:canvas.width/2,
+   y:canvas.height/2,
+   vx:(Math.random()-0.5)*10,
+   vy:(Math.random()-0.5)*10,
+   g:0.15,
+   life:100,
+   size:Math.random()*6+2
+  });
+ }
+}
+
+function draw(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ particles.forEach(p=>{
+  p.vy+=p.g;
+  p.x+=p.vx;
+  p.y+=p.vy;
+  p.life--;
+
+  ctx.fillStyle=`hsl(${Math.random()*360},100%,60%)`;
+  ctx.fillRect(p.x,p.y,p.size,p.size);
+ });
+
+ particles=particles.filter(p=>p.life>0);
+ requestAnimationFrame(draw);
+}
+draw();
+
+/* END FADE */
+setTimeout(()=>{
+ let v=0.12;
+ let fadeMusic=setInterval(()=>{
+  v-=0.002;
+  music.volume=Math.max(v,0);
+  if(v<=0) clearInterval(fadeMusic);
+ },100);
+
+ fade.classList.add("active");
+},40000);
+
+</script>
+
+</body>
+</html>
